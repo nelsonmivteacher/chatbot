@@ -706,11 +706,11 @@ CRITICAL RULES OF INTERACTION:
                                 <div class="text-sm text-slate-800 leading-relaxed">${formattedCleanText}</div>
                                 
                                 <div class="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap gap-3">
-                                    <button onclick="readAloudLocal(this, \`${escapeJsString(parsed.cleanText)}\`)" 
+                                    <button data-text="${escapeHtmlAttribute(parsed.cleanText)}" onclick="readAloudLocal(this)" 
                                         class="text-[11px] text-slate-500 hover:text-slate-800 font-medium flex items-center gap-1 transition">
                                         <i class="fa-solid fa-volume-low"></i> Local Voice (Slow)
                                     </button>
-                                    <button onclick="readAloudPremium(this, \`${escapeJsString(parsed.cleanText)}\`)" 
+                                    <button data-text="${escapeHtmlAttribute(parsed.cleanText)}" onclick="readAloudPremium(this)" 
                                         class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition">
                                         <i class="fa-solid fa-volume-high"></i> Gemini HD Voice ✨
                                     </button>
@@ -997,7 +997,8 @@ CRITICAL RULES OF INTERACTION:
         }
 
         // Local Browser Speech synthesis
-        function readAloudLocal(btnElement, textToSpeak) {
+        function readAloudLocal(btnElement) {
+            const textToSpeak = btnElement.getAttribute('data-text');
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
 
@@ -1031,6 +1032,89 @@ CRITICAL RULES OF INTERACTION:
                 window.speechSynthesis.speak(utterance);
             } else {
                 showToast("Your browser does not support Local Speech synthesis.");
+            }
+        }
+
+        // Premium HD Voice using gemini-2.5-flash-preview-tts
+        async function readAloudPremium(btnElement) {
+            const textToSpeak = btnElement.getAttribute('data-text');
+            const activeKey = getEffectiveApiKey();
+            if (!activeKey) {
+                openApiModal();
+                return;
+            }
+
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-indigo-500"></i> Loading HD Voice...';
+            btnElement.disabled = true;
+
+            try {
+                const cleanText = cleanSpeechText(textToSpeak);
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${activeKey}`;
+                
+                const payload = {
+                    contents: [{
+                        parts: [{ text: `Say clearly and slowly for a beginner: ${cleanText}` }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: "Zephyr" } // Bright friendly premium voice
+                            }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("HD Voice request failed.");
+                }
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)?.[1] || "24000", 10);
+                    
+                    // Decode base64 to array buffer
+                    const pcmBuffer = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmBuffer);
+                    
+                    // Convert raw PCM16 bits into browser playable WAV
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    
+                    // Play the generated premium audio
+                    const audio = new Audio(audioUrl);
+                    btnElement.innerHTML = '<i class="fa-solid fa-circle-play text-indigo-500 animate-bounce"></i> Playing HD...';
+                    
+                    audio.onended = () => {
+                        btnElement.innerHTML = originalHtml;
+                        btnElement.disabled = false;
+                        URL.revokeObjectURL(audioUrl);
+                    };
+
+                    await audio.play();
+                } else {
+                    throw new Error("No voice track received from Gemini.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast("Premium HD Voice failed. Falling back to Local Voice.");
+                btnElement.innerHTML = originalHtml;
+                btnElement.disabled = false;
+                // Fallback to local browser TTS
+                readAloudLocal(btnElement);
             }
         }
 
@@ -1505,6 +1589,15 @@ CRITICAL RULES OF INTERACTION:
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+        }
+
+        function escapeHtmlAttribute(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#x27;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
 
         function escapeJsString(str) {
