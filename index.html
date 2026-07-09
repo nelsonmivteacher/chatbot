@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher A1 - Interactive English Learning Bot with Gemini Features</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for chat history */
+        .chat-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- App Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">Teacher A1</h1>
+                    <p class="text-xs text-indigo-600 font-semibold flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Gemini-Powered Premium Classroom
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- API Key Status Badge -->
+                <button id="apiKeySettingsBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition text-sm font-medium">
+                    <span id="apiStatusDot" class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                    <span id="apiStatusText" class="text-slate-600">No API Key</span>
+                    <i class="fa-solid fa-gear text-xs text-slate-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 flex flex-col lg:flex-row gap-6 h-[calc(100vh-73px)] overflow-hidden">
+
+        <!-- Sidebar Section with dynamic learning tools tabs -->
+        <aside class="w-full lg:w-96 flex flex-col gap-4 shrink-0 h-full overflow-hidden pr-1">
+            
+            <!-- Tab Selection Buttons -->
+            <div class="bg-white p-1 rounded-xl border border-slate-200 flex shadow-sm shrink-0">
+                <button id="tabTeacherBtn" onclick="switchSidebarTab('teacher')" class="flex-1 text-center py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-user-tie"></i> Teacher
+                </button>
+                <button id="tabVisualizerBtn" onclick="switchSidebarTab('visualizer')" class="flex-1 text-center py-2 text-xs font-bold rounded-lg text-slate-600 hover:bg-slate-100 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI Visuals
+                </button>
+                <button id="tabChallengeBtn" onclick="switchSidebarTab('challenge')" class="flex-1 text-center py-2 text-xs font-bold rounded-lg text-slate-600 hover:bg-slate-100 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-list-check"></i> AI Quiz
+                </button>
+            </div>
+
+            <!-- Tab Content 1: Teacher Profile & Core Lessons -->
+            <div id="tabTeacher" class="flex flex-col gap-4 flex-1 overflow-y-auto">
+                <!-- Teacher Profile Card -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 to-violet-600"></div>
+                    <div class="flex items-center gap-4 mt-2">
+                        <div class="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center border-2 border-indigo-100 overflow-hidden shrink-0 relative">
+                            <!-- Custom Teacher SVG Avatar -->
+                            <svg class="w-10 h-10 text-indigo-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                            <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white"></div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Teacher A1</h3>
+                            <p class="text-xs text-slate-500">Premium English Guide</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-slate-100 space-y-3">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-bullseye text-indigo-500"></i> Correction Method
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Spotting grammatical errors immediately and presenting clean comparisons to help you lock in core language rules.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Predefined Lesson Starters -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-[220px]">
+                    <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-indigo-500"></i> Starter Topics
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">Select any topic to start practicing with Teacher A1:</p>
+                    
+                    <div class="space-y-2 flex-1 overflow-y-auto pr-1">
+                        <button onclick="selectTopic('My family')" class="w-full text-left p-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 border border-slate-100 hover:border-indigo-100 transition flex items-center justify-between text-xs font-medium text-slate-700 bg-slate-50">
+                            <span class="flex items-center gap-2">👨‍👩‍👧‍👦 <span>My family</span></span>
+                            <i class="fa-solid fa-chevron-right text-[10px] opacity-60"></i>
+                        </button>
+                        <button onclick="selectTopic('Ordering food')" class="w-full text-left p-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 border border-slate-100 hover:border-indigo-100 transition flex items-center justify-between text-xs font-medium text-slate-700 bg-slate-50">
+                            <span class="flex items-center gap-2">🍔 <span>Ordering food</span></span>
+                            <i class="fa-solid fa-chevron-right text-[10px] opacity-60"></i>
+                        </button>
+                        <button onclick="selectTopic('My daily routine')" class="w-full text-left p-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 border border-slate-100 hover:border-indigo-100 transition flex items-center justify-between text-xs font-medium text-slate-700 bg-slate-50">
+                            <span class="flex items-center gap-2">⏰ <span>My daily routine</span></span>
+                            <i class="fa-solid fa-chevron-right text-[10px] opacity-60"></i>
+                        </button>
+                        <button onclick="selectTopic('My favorite hobby')" class="w-full text-left p-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 border border-slate-100 hover:border-indigo-100 transition flex items-center justify-between text-xs font-medium text-slate-700 bg-slate-50">
+                            <span class="flex items-center gap-2">🎨 <span>My favorite hobby</span></span>
+                            <i class="fa-solid fa-chevron-right text-[10px] opacity-60"></i>
+                        </button>
+                        <button onclick="selectTopic('Describing my house')" class="w-full text-left p-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 border border-slate-100 hover:border-indigo-100 transition flex items-center justify-between text-xs font-medium text-slate-700 bg-slate-50">
+                            <span class="flex items-center gap-2">🏠 <span>Describing my house</span></span>
+                            <i class="fa-solid fa-chevron-right text-[10px] opacity-60"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 2: Vocabulary Visualizer (Gemini Imagen 4.0) -->
+            <div id="tabVisualizer" class="hidden flex-col gap-4 flex-1 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-y-auto">
+                <div>
+                    <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-image text-indigo-500"></i> Vocabulary Illustrator
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-1">Struggling with a word? Describe it, and Google Imagen will draw a custom picture to help you remember!</p>
+                </div>
+
+                <div class="space-y-3.5 mt-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">What do you want to visualize?</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="imagenPromptInput" placeholder="e.g., A happy brown puppy dog" 
+                                class="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl outline-none text-xs">
+                            <button onclick="generateVisualWord()" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 transition font-semibold text-xs shrink-0 flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Draw
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Output Canvas / Image Frame -->
+                    <div class="relative rounded-xl border border-dashed border-slate-200 bg-slate-50/50 aspect-square flex flex-col items-center justify-center overflow-hidden p-2">
+                        <!-- Loading State -->
+                        <div id="imagenLoader" class="hidden absolute inset-0 bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center">
+                            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+                            <p class="text-xs font-bold text-slate-800">Gemini is illustrating...</p>
+                            <p class="text-[10px] text-slate-500 mt-1">Generating custom educational artwork</p>
+                        </div>
+
+                        <!-- Illustrated Artwork -->
+                        <img id="visualizerImage" src="https://placehold.co/400x400/e2e8f0/64748b?text=Your+Vocabulary+Artwork" 
+                            alt="Visualized Word Output" class="w-full h-full object-cover rounded-lg">
+                    </div>
+                    
+                    <p class="text-[10px] text-slate-400 italic text-center">Powered by Google Imagen 4.0</p>
+                </div>
+            </div>
+
+            <!-- Tab Content 3: Interactive Challenge Quiz (Gemini Structured Generation) -->
+            <div id="tabChallenge" class="hidden flex-col gap-4 flex-1 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-y-auto">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-indigo-500"></i> AI Knowledge Quiz
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Let Gemini analyze our chat history to create a personalized A1 English quiz!</p>
+                    </div>
+                </div>
+
+                <div id="quizActionBlock" class="pt-2 text-center">
+                    <button onclick="generateAIQuiz()" class="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-xl transition shadow-md flex items-center justify-center gap-2 text-xs">
+                        <i class="fa-solid fa-rotate"></i> Generate Dynamic Quiz
+                    </button>
+                </div>
+
+                <div id="quizLoader" class="hidden flex-col items-center justify-center py-10 text-center">
+                    <div class="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+                    <p class="text-xs font-semibold text-slate-600">Analyzing conversation tenses and generating structured questions...</p>
+                </div>
+
+                <!-- Live Quiz Playground Container -->
+                <div id="quizContainer" class="space-y-4 hidden">
+                    <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Question <span id="currentQuizIdx">1</span> of 3</span>
+                        <span id="quizScoreText" class="text-xs font-bold text-slate-500">Score: 0/0</span>
+                    </div>
+
+                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                        <p id="quizQuestion" class="text-xs font-bold text-indigo-950 leading-relaxed">Reading question...</p>
+                    </div>
+
+                    <div id="quizOptions" class="space-y-2">
+                        <!-- Dynamic interactive buttons injected here -->
+                    </div>
+
+                    <div id="quizFeedback" class="hidden p-3 rounded-xl border text-xs font-medium"></div>
+
+                    <button id="quizNextBtn" onclick="nextQuizQuestion()" class="hidden w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl text-xs transition">
+                        Next Question <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+            
+        </aside>
+
+        <!-- Chat Area (Center/Right) -->
+        <section class="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-full">
+            
+            <!-- Chat Header -->
+            <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-3 w-3 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-600"></span>
+                    </span>
+                    <span class="font-semibold text-slate-800 text-sm">Classroom Session</span>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="clearChatHistory()" class="text-xs text-slate-500 hover:text-rose-600 transition flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100">
+                        <i class="fa-regular fa-trash-can"></i>
+                        <span>Reset Class</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Stream Area -->
+            <div id="chatHistory" class="flex-1 p-6 overflow-y-auto space-y-4 chat-scroll bg-slate-50/30">
+                <!-- Chat messages will be injected dynamically here -->
+            </div>
+
+            <!-- Typing indicator -->
+            <div id="typingIndicator" class="px-6 py-2.5 bg-slate-50 border-t border-slate-100 hidden">
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <div class="flex gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.4s]"></span>
+                    </div>
+                    <span>Teacher A1 is reading and typing...</span>
+                </div>
+            </div>
+
+            <!-- Input Area Footer -->
+            <div class="p-4 border-t border-slate-200 bg-white">
+                <!-- Mini Scaffolding assist toolbar -->
+                <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
+                    <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider shrink-0 mr-1">Quick Help:</span>
+                    <button onclick="insertTemplate('I don\'t understand')" class="text-xs px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 transition rounded-md font-medium text-slate-600 border border-slate-200 shrink-0">
+                        ❓ I don't understand
+                    </button>
+                    <button onclick="insertTemplate('Can you explain in Spanish?')" class="text-xs px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 transition rounded-md font-medium text-slate-600 border border-slate-200 shrink-0">
+                        🇪🇸 ¿Español por favor?
+                    </button>
+                    <button onclick="askForTeacherHelp()" class="text-xs px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 transition rounded-md font-bold border border-amber-200 shrink-0 flex items-center gap-1">
+                        💡 Give me a hint
+                    </button>
+                </div>
+
+                <!-- Main input form -->
+                <form id="chatForm" class="flex gap-2">
+                    <input type="text" id="userInput" placeholder="Type your English response here..." autocomplete="off"
+                        class="flex-1 px-4 py-3 bg-slate-50 focus:bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl outline-none transition text-sm">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold px-5 rounded-xl transition shadow-md shadow-indigo-100 flex items-center gap-2">
+                        <span>Send</span>
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
+                <div class="mt-2 text-center">
+                    <p class="text-[10px] text-slate-400">Remember: Be brave! It's okay to make mistakes. Teacher A1 will help you correct them.</p>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Setup / Configuration Modal overlay -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden animate-fade-in">
+        <div class="bg-white rounded-2xl border border-slate-200 max-w-md w-full shadow-2xl overflow-hidden relative">
+            <div class="p-6">
+                <!-- Header with custom logo -->
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                        <i class="fa-solid fa-key text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">API Configuration</h2>
+                        <p class="text-xs text-slate-500">Enable Gemini-powered AI Teacher</p>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-5">
+                    <h3 class="text-xs font-bold text-indigo-800 uppercase tracking-wide mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-info"></i> How to Get a Free Key:
+                    </h3>
+                    <p class="text-xs text-indigo-700 leading-relaxed mb-2">
+                        This application requires a Google Gemini API Key to function. It stays entirely on your browser and is never stored on external servers.
+                    </p>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 underline">
+                        Get your API Key from Google AI Studio <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                </div>
+
+                <form id="apiKeyForm" class="space-y-4">
+                    <div>
+                        <label for="apiKeyInput" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Your Gemini API Key</label>
+                        <div class="relative">
+                            <input type="password" id="apiKeyInput" placeholder="AIzaSy..." required
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-xl outline-none transition text-sm pr-10 font-mono">
+                            <button type="button" id="toggleApiKeyVisibility" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-eye text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Custom Alerts Inside Modal -->
+                    <div id="modalAlert" class="hidden p-3 rounded-lg text-xs font-medium"></div>
+
+                    <div class="flex gap-2.5 pt-2">
+                        <button type="button" id="closeModalBtn" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition text-sm font-semibold text-slate-700">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition text-sm font-semibold shadow-md shadow-indigo-100">
+                            Save & Connect
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert / Toast Component -->
+    <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-lg flex items-center gap-2.5 text-xs font-semibold translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toastMessage">Success</span>
+    </div>
+
+    <script>
+        // Mandated Environment Variable for injected API key
+        const apiKey = ""; 
+
+        // System Prompt embodying A1 level pedagogical parameters
+        const TEACHER_SYSTEM_PROMPT = `
+Act as a world-class, extremely patient but rigorous English instructor named "Teacher A1" for absolute beginner students (A1 level). 
+Your objective is to help students build a solid foundation by immediately catching and highlighting fundamental grammatical and vocabulary errors.
+
+CRITICAL RULES OF INTERACTION:
+1. LANGUAGE: Use very short, simple, and clean sentences. Stick to Present Simple, Past Simple, and elementary verbs. NEVER use idioms, complex phrasal verbs, jargon, or complex tenses.
+2. DINÁMICA DE INICIO (If beginning the conversation): You must greet the student warmly and provide exactly two options:
+   A) The student proposes a basic topic or vocabulary theme.
+   B) You offer 5 simple topic options: "My family", "Ordering food", "My daily routine", "My favorite hobby", "Describing my house".
+3. STRICT A1 CORRECTION FORMAT: You must be incredibly direct. If you spot ANY grammatical, spelling, or vocabulary mistake, do not ignore it. You MUST format the correction using this exact syntax at the very top of your response:
+   Correction: "[User's original bad phrase]" -> "[Corrected phrase]"
+   Example: Correction: "I no like apple" -> "I don't like apples"
+   (Always apply this block before continuing the conversation).
+4. SCAFFOLDING SUPPORT: If the student struggles, writes brief broken phrases, or asks for help, provide hints, vocabulary, or grammar structures in parentheses to assist. E.g., (Hint: Remember to use "don't" or "doesn't" for negative sentences!).
+5. LANGUAGE PREFERENCE: Speak strictly in English. However, if the student gets stuck or explicitly asks in Spanish, you can give a very brief, friendly clarification in Spanish, then pivot right back to English.
+6. RESPOND DIRECTLY: Always keep responses concise, conversational, and encouraging, focusing on only one small concept or question at a time.
+`;
+
+        // Local State Variables
+        let conversationHistory = [];
+        let savedApiKey = localStorage.getItem('gemini_api_key') || '';
+        let isSynthesizingSpeech = false;
+        
+        // Dynamic Quiz state storage
+        let quizQuestions = [];
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+
+        // Elements
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiKeyForm = document.getElementById('apiKeyForm');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const toggleApiKeyVisibility = document.getElementById('toggleApiKeyVisibility');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const apiKeySettingsBtn = document.getElementById('apiKeySettingsBtn');
+        const apiStatusDot = document.getElementById('apiStatusDot');
+        const apiStatusText = document.getElementById('apiStatusText');
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        const chatHistoryContainer = document.getElementById('chatHistory');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const modalAlert = document.getElementById('modalAlert');
+
+        window.addEventListener('load', () => {
+            initApp();
+        });
+
+        // Safe fetch of the active API key (prioritizing the environment-injected variable)
+        function getEffectiveApiKey() {
+            if (typeof apiKey !== 'undefined' && apiKey && apiKey !== "") {
+                return apiKey;
+            }
+            return savedApiKey;
+        }
+
+        function initApp() {
+            // Update API Key Display status
+            updateApiStatusBadge();
+
+            // Set up listeners
+            apiKeySettingsBtn.addEventListener('click', openApiModal);
+            closeModalBtn.addEventListener('click', closeApiModal);
+            apiKeyForm.addEventListener('submit', saveApiKeyHandler);
+            chatForm.addEventListener('submit', handleUserSendMessage);
+            
+            toggleApiKeyVisibility.addEventListener('click', () => {
+                const isPassword = apiKeyInput.type === 'password';
+                apiKeyInput.type = isPassword ? 'text' : 'password';
+                toggleApiKeyVisibility.innerHTML = isPassword ? 
+                    '<i class="fa-solid fa-eye-slash text-sm"></i>' : 
+                    '<i class="fa-solid fa-eye text-sm"></i>';
+            });
+
+            // Initialize or load past chat
+            const loadedHistory = localStorage.getItem('teacher_a1_chat');
+            if (loadedHistory) {
+                conversationHistory = JSON.parse(loadedHistory);
+                renderChatHistory();
+            } else {
+                startNewClass();
+            }
+        }
+
+        // Setup clean startup text from the Teacher
+        function startNewClass() {
+            conversationHistory = [];
+            
+            const starterMessage = {
+                role: 'model',
+                parts: [{ 
+                    text: `Hello there! I am **Teacher A1**, your patient English guide. 👋\n\nI am ready to help you practice English. To start, please select one of the following options:\n\n**A)** Tell me a topic you want to talk about.\n**B)** Choose one of these 5 easy topics:\n* 1. *My family* 👨‍👩‍👧‍👦\n* 2. *Ordering food* 🍔\n* 3. *My daily routine* ⏰\n* 4. *My favorite hobby* 🎨\n* 5. *Describing my house* 🏠\n\nWrite your answer below! I am listening.` 
+                }]
+            };
+            
+            conversationHistory.push(starterMessage);
+            saveChatToLocalStorage();
+            renderChatHistory();
+        }
+
+        function updateApiStatusBadge() {
+            const activeKey = getEffectiveApiKey();
+            if (activeKey) {
+                apiStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+                apiStatusText.textContent = "API Key Active";
+                apiStatusText.className = "text-slate-700 text-sm font-semibold";
+                apiKeyInput.value = savedApiKey || (apiKey ? "Runtime Key" : "");
+            } else {
+                apiStatusDot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse";
+                apiStatusText.textContent = "No API Key - Click Setup";
+                apiStatusText.className = "text-rose-600 text-sm font-semibold";
+            }
+        }
+
+        function switchSidebarTab(tabName) {
+            const tabs = ['teacher', 'visualizer', 'challenge'];
+            tabs.forEach(tab => {
+                const btn = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}Btn`);
+                const content = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+                if (tab === tabName) {
+                    btn.className = "flex-1 text-center py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white transition flex items-center justify-center gap-1.5";
+                    content.classList.remove('hidden');
+                    content.classList.add('flex');
+                } else {
+                    btn.className = "flex-1 text-center py-2 text-xs font-bold rounded-lg text-slate-600 hover:bg-slate-100 transition flex items-center justify-center gap-1.5";
+                    content.classList.add('hidden');
+                    content.classList.remove('flex');
+                }
+            });
+        }
+
+        function openApiModal() {
+            modalAlert.classList.add('hidden');
+            apiKeyModal.classList.remove('hidden');
+        }
+
+        function closeApiModal() {
+            apiKeyModal.classList.add('hidden');
+        }
+
+        function saveApiKeyHandler(e) {
+            e.preventDefault();
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                savedApiKey = key;
+                localStorage.setItem('gemini_api_key', key);
+                updateApiStatusBadge();
+                showToast("API Key Configured Successfully!");
+                closeApiModal();
+                
+                // If there's only the starting message, we're ready to proceed
+                if (conversationHistory.length <= 1) {
+                    startNewClass();
+                }
+            }
+        }
+
+        // Highlight and separate grammatical corrections for premium student UX
+        function parseTeacherResponse(rawText) {
+            let correctionBlock = null;
+            let cleanText = rawText;
+
+            // Search for standard "Correction: "old" -> "new"" pattern or variations
+            const correctionRegex = /(?:Correction|Correcion|Corregido)\s*:\s*["'«]([^"'»]+)["'»]\s*(?:->|to)\s*["'«]([^"'»]+)["'»]/i;
+            const match = rawText.match(correctionRegex);
+
+            if (match) {
+                correctionBlock = {
+                    original: match[1],
+                    corrected: match[2]
+                };
+                // Extract the matching line from the text body to keep conversation bubble tidy
+                cleanText = rawText.replace(correctionRegex, '').trim();
+            }
+
+            // Also check for Spanish hints inside parentheses
+            const scaffoldRegex = /\(([^)]+)\)/g;
+            const hasHints = cleanText.match(scaffoldRegex);
+
+            return {
+                correctionBlock,
+                cleanText,
+                hasHints
+            };
+        }
+
+        function renderChatHistory() {
+            chatHistoryContainer.innerHTML = '';
+
+            conversationHistory.forEach((msg, idx) => {
+                if (msg.role === 'system') return;
+
+                const isUser = msg.role === 'user';
+                const messageText = msg.parts[0].text;
+
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = `flex w-full mb-4 ${isUser ? 'justify-end' : 'justify-start'}`;
+
+                if (isUser) {
+                    messageWrapper.innerHTML = `
+                        <div class="max-w-[85%] bg-indigo-600 text-white rounded-2xl rounded-tr-xs px-4.5 py-3 shadow-sm">
+                            <p class="text-sm leading-relaxed">${escapeHTML(messageText)}</p>
+                        </div>
+                    `;
+                } else {
+                    const parsed = parseTeacherResponse(messageText);
+                    
+                    let correctionHtml = '';
+                    if (parsed.correctionBlock) {
+                        correctionHtml = `
+                            <div class="mb-3 p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-2.5 animate-pulse">
+                                <span class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold mt-0.5 shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </span>
+                                <div class="text-xs">
+                                    <div class="font-bold text-rose-800">Direct Correction:</div>
+                                    <div class="mt-1 font-mono text-slate-700">
+                                        <span class="line-through text-slate-400">"${escapeHTML(parsed.correctionBlock.original)}"</span>
+                                        <i class="fa-solid fa-arrow-right mx-1.5 text-rose-500 text-[10px]"></i>
+                                        <span class="font-bold text-rose-700">"${escapeHTML(parsed.correctionBlock.corrected)}"</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Format Markdown Bold elements simply
+                    let formattedCleanText = parsed.cleanText
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                        .replace(/\n/g, '<br>');
+
+                    // Render Teacher Bubble
+                    messageWrapper.innerHTML = `
+                        <div class="flex gap-3 max-w-[85%]">
+                            <div class="w-9 h-9 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-sm font-bold shrink-0 shadow-sm">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </div>
+                            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-xs px-4.5 py-3 shadow-xs">
+                                ${correctionHtml}
+                                <div class="text-sm text-slate-800 leading-relaxed">${formattedCleanText}</div>
+                                
+                                <div class="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap gap-3">
+                                    <button onclick="readAloudLocal(this, \`${escapeJsString(parsed.cleanText)}\`)" 
+                                        class="text-[11px] text-slate-500 hover:text-slate-800 font-medium flex items-center gap-1 transition">
+                                        <i class="fa-solid fa-volume-low"></i> Local Voice (Slow)
+                                    </button>
+                                    <button onclick="readAloudPremium(this, \`${escapeJsString(parsed.cleanText)}\`)" 
+                                        class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition">
+                                        <i class="fa-solid fa-volume-high"></i> Gemini HD Voice ✨
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                chatHistoryContainer.appendChild(messageWrapper);
+            });
+
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        }
+
+        async function handleUserSendMessage(e) {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            const activeKey = getEffectiveApiKey();
+            if (!activeKey) {
+                openApiModal();
+                modalAlert.textContent = "Please enter a Google Gemini API Key to speak to Teacher A1.";
+                modalAlert.className = "p-3 rounded-lg text-xs font-medium bg-rose-50 border border-rose-100 text-rose-700";
+                return;
+            }
+
+            const userMsg = {
+                role: 'user',
+                parts: [{ text: text }]
+            };
+            conversationHistory.push(userMsg);
+            renderChatHistory();
+            userInput.value = '';
+
+            typingIndicator.classList.remove('hidden');
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+
+            try {
+                const response = await callGeminiAPIWithBackoff();
+                
+                if (response && response.candidates && response.candidates[0].content) {
+                    const modelText = response.candidates[0].content.parts[0].text;
+                    
+                    const teacherMsg = {
+                        role: 'model',
+                        parts: [{ text: modelText }]
+                    };
+                    
+                    conversationHistory.push(teacherMsg);
+                    saveChatToLocalStorage();
+                    renderChatHistory();
+                } else {
+                    throw new Error("Invalid response format from Gemini");
+                }
+
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                
+                const errorMsg = {
+                    role: 'model',
+                    parts: [{ text: `🚨 **Classroom connection error:** I had trouble connecting to my servers. Please make sure your Gemini API Key is active or valid. (${error.message})` }]
+                };
+                conversationHistory.push(errorMsg);
+                renderChatHistory();
+            } finally {
+                typingIndicator.classList.add('hidden');
+            }
+        }
+
+        async function callGeminiAPIWithBackoff(retries = 3, delay = 1000) {
+            const activeKey = getEffectiveApiKey();
+            // Use stable authorized model gemini-2.5-flash-preview-09-2025
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
+            
+            const formattedContents = [];
+            conversationHistory.forEach(msg => {
+                formattedContents.push({
+                    role: msg.role,
+                    parts: msg.parts
+                });
+            });
+
+            const payload = {
+                contents: formattedContents,
+                systemInstruction: {
+                    parts: [{ text: TEACHER_SYSTEM_PROMPT }]
+                },
+                generationConfig: {
+                    temperature: 0.3,
+                    maxOutputTokens: 500,
+                }
+            };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429) {
+                        // Rate limit / Throttling -- implement exponential backoff
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        const errorDetails = await response.json().catch(() => ({}));
+                        throw new Error(errorDetails?.error?.message || `HTTP Status ${response.status}`);
+                    }
+
+                    return await response.json();
+                } catch (err) {
+                    if (i === retries - 1) throw err;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        function selectTopic(topicName) {
+            userInput.value = `I choose Option B. I want to talk about: ${topicName}`;
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+
+        function insertTemplate(text) {
+            userInput.value = text;
+            userInput.focus();
+        }
+
+        async function askForTeacherHelp() {
+            const activeKey = getEffectiveApiKey();
+            if (!activeKey) {
+                openApiModal();
+                return;
+            }
+
+            typingIndicator.classList.remove('hidden');
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+
+            try {
+                // Use stable authorized model gemini-2.5-flash-preview-09-2025
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
+                
+                const payload = {
+                    contents: [
+                        ...conversationHistory.map(msg => ({ role: msg.role, parts: msg.parts })),
+                        {
+                            role: 'user',
+                            parts: [{ text: "System prompt helper request: The student is stuck. Give me a brief hint, some simple A1 words, or useful sentence structures in parentheses to help me answer your last response. Answer briefly in 1-2 lines." }]
+                        }
+                    ],
+                    systemInstruction: {
+                        parts: [{ text: TEACHER_SYSTEM_PROMPT }]
+                    },
+                    generationConfig: {
+                        temperature: 0.4,
+                        maxOutputTokens: 150
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                const hint = data.candidates[0].content.parts[0].text;
+
+                const hintBlock = document.createElement('div');
+                hintBlock.className = "flex justify-center my-3 animate-fade-in";
+                hintBlock.innerHTML = `
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-[90%] text-xs text-amber-900 shadow-sm">
+                        <div class="font-bold flex items-center gap-1.5 mb-1 text-amber-800">
+                            <i class="fa-regular fa-lightbulb"></i> Teacher's Scaffolding Advice:
+                        </div>
+                        <p class="leading-relaxed font-medium">${escapeHTML(hint)}</p>
+                    </div>
+                `;
+                chatHistoryContainer.appendChild(hintBlock);
+                chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+
+            } catch (err) {
+                showToast("Could not retrieve hints right now.");
+            } finally {
+                typingIndicator.classList.add('hidden');
+            }
+        }
+
+        // Local Browser Speech synthesis
+        function readAloudLocal(btnElement, textToSpeak) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+
+                if (isSynthesizingSpeech) {
+                    isSynthesizingSpeech = false;
+                    btnElement.innerHTML = '<i class="fa-solid fa-volume-low"></i> Local Voice (Slow)';
+                    return;
+                }
+
+                const speechContent = cleanSpeechText(textToSpeak);
+                const utterance = new SpeechSynthesisUtterance(speechContent);
+                
+                const voices = window.speechSynthesis.getVoices();
+                const englishVoice = voices.find(voice => voice.lang.startsWith('en-')) || voices[0];
+                if (englishVoice) {
+                    utterance.voice = englishVoice;
+                }
+                
+                utterance.rate = 0.8; // Friendly beginner pacing
+
+                utterance.onstart = () => {
+                    isSynthesizingSpeech = true;
+                    btnElement.innerHTML = '<i class="fa-solid fa-circle-stop text-rose-500 animate-pulse"></i> Stop';
+                };
+
+                utterance.onend = () => {
+                    isSynthesizingSpeech = false;
+                    btnElement.innerHTML = '<i class="fa-solid fa-volume-low"></i> Local Voice (Slow)';
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast("Your browser does not support Local Speech synthesis.");
+            }
+        }
+
+        // Premium HD Voice using gemini-2.5-flash-preview-tts
+        async function readAloudPremium(btnElement, textToSpeak) {
+            const activeKey = getEffectiveApiKey();
+            if (!activeKey) {
+                openApiModal();
+                return;
+            }
+
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-indigo-500"></i> Loading HD Voice...';
+            btnElement.disabled = true;
+
+            try {
+                const cleanText = cleanSpeechText(textToSpeak);
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${activeKey}`;
+                
+                const payload = {
+                    contents: [{
+                        parts: [{ text: `Say clearly and slowly for a beginner: ${cleanText}` }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: "Zephyr" } // Bright friendly premium voice
+                            }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("HD Voice request failed.");
+                }
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)?.[1] || "24000", 10);
+                    
+                    // Decode base64 to array buffer
+                    const pcmBuffer = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmBuffer);
+                    
+                    // Convert raw PCM16 bits into browser playable WAV
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    
+                    // Play the generated premium audio
+                    const audio = new Audio(audioUrl);
+                    btnElement.innerHTML = '<i class="fa-solid fa-circle-play text-indigo-500 animate-bounce"></i> Playing HD...';
+                    
+                    audio.onended = () => {
+                        btnElement.innerHTML = originalHtml;
+                        btnElement.disabled = false;
+                        URL.revokeObjectURL(audioUrl);
+                    };
+
+                    await audio.play();
+                } else {
+                    throw new Error("No voice track received from Gemini.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast("Premium HD Voice failed. Falling back to Local Voice.");
+                btnElement.innerHTML = originalHtml;
+                btnElement.disabled = false;
+                // Fallback to local browser TTS
+                readAloudLocal(btnElement, textToSpeak);
+            }
+        }
+
+        // Audio helper: Convert raw Base64 bytes to raw ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Audio helper: Package raw mono PCM16 audio chunks inside a valid WAV container
+        function pcmToWav(pcm16, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcm16.length * 2);
+            const view = new DataView(buffer);
+            
+            // RIFF identifier
+            writeString(view, 0, 'RIFF');
+            // file length minus RIFF identifier & file length itself
+            view.setUint32(4, 36 + pcm16.length * 2, true);
+            // RIFF type
+            writeString(view, 8, 'WAVE');
+            // format chunk identifier
+            writeString(view, 12, 'fmt ');
+            // format chunk length
+            view.setUint32(16, 16, true);
+            // sample format (raw PCM)
+            view.setUint16(20, 1, true);
+            // channel count (1 = mono)
+            view.setUint16(22, 1, true);
+            // sample rate
+            view.setUint32(24, sampleRate, true);
+            // byte rate = (sample rate * block align)
+            view.setUint32(28, sampleRate * 2, true);
+            // block align = (channel count * bytes per sample)
+            view.setUint16(32, 2, true);
+            // bits per sample (16 bit signed PCM)
+            view.setUint16(34, 16, true);
+            // data chunk identifier
+            writeString(view, 36, 'data');
+            // data chunk length
+            view.setUint32(40, pcm16.length * 2, true);
+            
+            // write PCM samples
+            for (let i = 0; i < pcm16.length; i++) {
+                view.setInt16(44 + i * 2, pcm16[i], true);
+            }
+            
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        function cleanSpeechText(text) {
+            return text
+                .replace(/\([^)]+\)/g, '') // remove scaffold tenses in parenthesis
+                .replace(/Correction:.*->/i, '') // remove corrective syntax tags
+                .replace(/[^a-zA-Z0-9 .,!?']/g, '') // retain only simple words
+                .trim();
+        }
+
+        // Dynamic Vocabulary Illustrator using Google Imagen 4.0
+        async function generateVisualWord() {
+            const activeKey = getEffectiveApiKey();
+            if (!activeKey) {
+                openApiModal();
+                return;
+            }
+
+            const promptInput = document.getElementById('imagenPromptInput');
+            const promptVal = promptInput.value.trim();
+            if (!promptVal) {
+                showToast("Please enter a vocabulary word or description!");
+                return;
+            }
+
+            const loader = document.getElementById('imagenLoader');
+            const visualImg = document.getElementById('visualizerImage');
+
+            loader.classList.remove('hidden');
+
+            try {
+                // Use Google Imagen 4.0 predict endpoint
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${activeKey}`;
+                
+                const payload = {
+                    instances: [
+                        { prompt: `A clear, friendly, bright colored educational style picture for beginner students illustrating: ${promptVal}` }
+                    ],
+                    parameters: {
+                        sampleCount: 1,
+                        aspectRatio: "1:1",
+                        outputMimeType: "image/png"
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Visualizer request failed. Double-check your API permissions.");
+                }
+
+                const result = await response.json();
+                const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+
+                if (base64Data) {
+                    visualImg.src = `data:image/png;base64,${base64Data}`;
+                    showToast("New Vocabulary Illustration Created! ✨");
+                } else {
+                    throw new Error("No graphic output received from Imagen.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast("Illustrator failed. Trying Gemini-Flash alternative...");
+                // Secondary Fallback: Use standard Gemini 2.5 Flash image modality
+                await generateVisualWordFallback(promptVal);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Fallback using gemini-2.5-flash-image-preview
+        async function generateVisualWordFallback(promptVal) {
+            const activeKey = getEffectiveApiKey();
+            try {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${activeKey}`;
+                const payload = {
+                    contents: [{
+                        parts: [{ text: `Generate a cartoon illustration representing: ${promptVal}` }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ['TEXT', 'IMAGE']
+                    }
+                };
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                
+                if (base64Data) {
+                    const visualImg = document.getElementById('visualizerImage');
+                    visualImg.src = `data:image/png;base64,${base64Data}`;
+                    showToast("Vocabulary Illustration Generated!");
+                } else {
+                    throw new Error("Fallback failed too.");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Could not generate illustration. Please try a different prompt.");
+            }
+        }
+
+        // Structured Interactive Quiz via Gemini JSON Generation Schema
+        async function generateAIQuiz() {
+            const activeKey = getEffectiveApiKey();
+            if (!activeKey) {
+                openApiModal();
+                return;
+            }
+
+            const actionBlock = document.getElementById('quizActionBlock');
+            const loader = document.getElementById('quizLoader');
+            const container = document.getElementById('quizContainer');
+
+            actionBlock.classList.add('hidden');
+            loader.classList.remove('hidden');
+            container.classList.add('hidden');
+
+            try {
+                // Use stable authorized model gemini-2.5-flash-preview-09-2025
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
+                
+                // Formulate conversation log extract
+                const textHistoryLog = conversationHistory
+                    .slice(-6)
+                    .map(msg => `${msg.role === 'user' ? 'Student' : 'Teacher'}: ${msg.parts[0].text}`)
+                    .join("\n");
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [{
+                            text: `Generate an absolute beginner (A1 Level) English multiple-choice quiz of exactly 3 questions based on our chat history.\n\nChat History context:\n${textHistoryLog || "The student is starting to learn English."}`
+                        }]
+                    }],
+                    systemInstruction: {
+                        parts: [{ text: "You are an educational assistant. Generate exactly 3 simple A1-level grammar/vocab multiple-choice questions with 3 options each based on the provided conversation. Return output strictly in standard JSON format matching the schema." }]
+                    },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            description: "List of 3 interactive quiz questions",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    question: { type: "STRING", description: "The quiz question (keep it simple for A1 level)" },
+                                    options: {
+                                        type: "ARRAY",
+                                        items: { type: "STRING" },
+                                        description: "Exactly 3 simple potential answers"
+                                    },
+                                    correctIdx: { type: "INTEGER", description: "Index of the correct answer (0, 1, or 2)" },
+                                    explanation: { type: "STRING", description: "Short explanation of why it is correct" }
+                                },
+                                required: ["question", "options", "correctIdx", "explanation"],
+                                propertyOrdering: ["question", "options", "correctIdx", "explanation"]
+                            }
+                        }
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("Quiz API generator call failed.");
+
+                const result = await response.json();
+                const jsonText = result.candidates[0].content.parts[0].text;
+                
+                quizQuestions = JSON.parse(jsonText);
+                currentQuizIndex = 0;
+                quizScore = 0;
+
+                if (quizQuestions && quizQuestions.length > 0) {
+                    renderQuizQuestion();
+                    container.classList.remove('hidden');
+                } else {
+                    throw new Error("Empty quiz array returned");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast("Could not prepare the quiz. Try chatting a bit more first!");
+                actionBlock.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function renderQuizQuestion() {
+            const questionData = quizQuestions[currentQuizIndex];
+            
+            document.getElementById('currentQuizIdx').textContent = currentQuizIndex + 1;
+            document.getElementById('quizScoreText').textContent = `Score: ${quizScore}/${quizQuestions.length}`;
+            document.getElementById('quizQuestion').textContent = questionData.question;
+
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+
+            const feedback = document.getElementById('quizFeedback');
+            feedback.classList.add('hidden');
+            document.getElementById('quizNextBtn').classList.add('hidden');
+
+            questionData.options.forEach((option, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-slate-50 transition text-xs font-semibold text-slate-800 flex items-center justify-between";
+                btn.innerHTML = `
+                    <span>${option}</span>
+                    <i class="fa-regular fa-circle text-slate-300"></i>
+                `;
+                btn.onclick = () => submitQuizAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function submitQuizAnswer(selectedIdx, clickedBtn) {
+            const questionData = quizQuestions[currentQuizIndex];
+            const optionsContainer = document.getElementById('quizOptions');
+            
+            // Disable further option clicks
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                btn.className = btn.className.replace("hover:border-indigo-300 hover:bg-slate-50", "opacity-60");
+            });
+
+            const feedback = document.getElementById('quizFeedback');
+            feedback.classList.remove('hidden');
+
+            const isCorrect = selectedIdx === questionData.correctIdx;
+
+            if (isCorrect) {
+                quizScore++;
+                clickedBtn.className = "w-full text-left p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-950 font-bold flex items-center justify-between";
+                clickedBtn.querySelector('i').className = "fa-solid fa-circle-check text-emerald-600";
+                
+                feedback.className = "p-3 rounded-xl border border-emerald-100 bg-emerald-50/50 text-emerald-800 text-xs font-medium";
+                feedback.innerHTML = `<strong>Correct!</strong> 🎉 ${questionData.explanation}`;
+            } else {
+                clickedBtn.className = "w-full text-left p-3.5 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-950 font-bold flex items-center justify-between";
+                clickedBtn.querySelector('i').className = "fa-solid fa-circle-xmark text-rose-600";
+                
+                // Highlight correct button
+                const correctBtn = optionsContainer.children[questionData.correctIdx];
+                correctBtn.className = "w-full text-left p-3.5 rounded-xl border border-emerald-500 bg-emerald-50/50 text-emerald-900 font-bold flex items-center justify-between";
+                
+                feedback.className = "p-3 rounded-xl border border-rose-100 bg-rose-50/50 text-rose-800 text-xs font-medium";
+                feedback.innerHTML = `<strong>Not quite!</strong> ${questionData.explanation}`;
+            }
+
+            document.getElementById('quizScoreText').textContent = `Score: ${quizScore}/${quizQuestions.length}`;
+            document.getElementById('quizNextBtn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizQuestions.length) {
+                renderQuizQuestion();
+            } else {
+                // Show completion results screen
+                const container = document.getElementById('quizContainer');
+                container.innerHTML = `
+                    <div class="text-center py-6 space-y-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-2xl">
+                            🏆
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Quiz Completed!</h4>
+                            <p class="text-xs text-slate-500 mt-1">Excellent practice. Your final score is shown below:</p>
+                        </div>
+                        <div class="inline-block px-4 py-2 bg-indigo-600 text-white font-black text-lg rounded-xl shadow-md">
+                            ${quizScore} / ${quizQuestions.length}
+                        </div>
+                        <div>
+                            <button onclick="resetQuizView()" class="mt-2 py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-lg transition">
+                                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Try Another Quiz
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function resetQuizView() {
+            const container = document.getElementById('quizContainer');
+            // Re-render original template layout
+            container.innerHTML = `
+                <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
+                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Question <span id="currentQuizIdx">1</span> of 3</span>
+                    <span id="quizScoreText" class="text-xs font-bold text-slate-500">Score: 0/0</span>
+                </div>
+                <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                    <p id="quizQuestion" class="text-xs font-bold text-indigo-950 leading-relaxed">Reading question...</p>
+                </div>
+                <div id="quizOptions" class="space-y-2"></div>
+                <div id="quizFeedback" class="hidden p-3 rounded-xl border text-xs font-medium"></div>
+                <button id="quizNextBtn" onclick="nextQuizQuestion()" class="hidden w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl text-xs transition">
+                    Next Question <i class="fa-solid fa-chevron-right ml-1"></i>
+                </button>
+            `;
+            container.classList.add('hidden');
+            document.getElementById('quizActionBlock').classList.remove('hidden');
+        }
+
+        function saveChatToLocalStorage() {
+            localStorage.setItem('teacher_a1_chat', JSON.stringify(conversationHistory));
+        }
+
+        function clearChatHistory() {
+            if (confirm("Are you sure you want to clear your current progress and start a new class?")) {
+                localStorage.removeItem('teacher_a1_chat');
+                startNewClass();
+                resetQuizView();
+                showToast("Classroom reset done!");
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = message;
+            
+            toast.className = "fixed bottom-6 right-6 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-lg flex items-center gap-2.5 text-xs font-semibold translate-y-0 opacity-100 transition-all duration-300 z-50";
+            
+            setTimeout(() => {
+                toast.className = "fixed bottom-6 right-6 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-lg flex items-center gap-2.5 text-xs font-semibold translate-y-20 opacity-0 transition-all duration-300 z-50";
+            }, 3000);
+        }
+
+        function escapeHTML(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeJsString(str) {
+            return str
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, ' ');
+        }
+    </script>
+</body>
+</html>
