@@ -499,6 +499,54 @@ CRITICAL RULES OF INTERACTION:
             apiKeyModal.classList.remove('hidden');
         }
 
+        // Generic wrapper with multi-model fallback list (preview-09-2025 -> v2.5-flash -> v1.5-flash)
+        async function callGeminiGeneric(payload, retries = 3, delay = 1000) {
+            const activeKey = getEffectiveApiKey();
+            const models = ["gemini-2.5-flash-preview-09-2025", "gemini-2.5-flash", "gemini-1.5-flash"];
+            let lastError = null;
+
+            for (const modelName of models) {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeKey}`;
+                let currentDelay = delay;
+
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.status === 429) {
+                            await new Promise(resolve => setTimeout(resolve, currentDelay));
+                            currentDelay *= 2;
+                            continue;
+                        }
+
+                        // Catch "Model not found" or "invalid version" immediately and skip to the next model in the list
+                        if (response.status === 404 || response.status === 400) {
+                            const errData = await response.json().catch(() => ({}));
+                            lastError = new Error(errData?.error?.message || `Status ${response.status}`);
+                            break; 
+                        }
+
+                        if (!response.ok) {
+                            const errorDetails = await response.json().catch(() => ({}));
+                            throw new Error(errorDetails?.error?.message || `HTTP Status ${response.status}`);
+                        }
+
+                        return await response.json(); // Successful response returned
+                    } catch (err) {
+                        lastError = err;
+                        if (i === retries - 1) break; // Proceed to next model in sequence
+                        await new Promise(resolve => setTimeout(resolve, currentDelay));
+                        currentDelay *= 2;
+                    }
+                }
+            }
+            throw lastError || new Error("All fallback models failed.");
+        }
+
         function closeApiModal() {
             apiKeyModal.classList.add('hidden');
         }
@@ -683,10 +731,6 @@ CRITICAL RULES OF INTERACTION:
         }
 
         async function callGeminiAPIWithBackoff(retries = 3, delay = 1000) {
-            const activeKey = getEffectiveApiKey();
-            // Use stable authorized model gemini-2.5-flash-preview-09-2025
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
-            
             const formattedContents = [];
             conversationHistory.forEach(msg => {
                 formattedContents.push({
@@ -706,33 +750,7 @@ CRITICAL RULES OF INTERACTION:
                 }
             };
 
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.status === 429) {
-                        // Rate limit / Throttling -- implement exponential backoff
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
-                        continue;
-                    }
-
-                    if (!response.ok) {
-                        const errorDetails = await response.json().catch(() => ({}));
-                        throw new Error(errorDetails?.error?.message || `HTTP Status ${response.status}`);
-                    }
-
-                    return await response.json();
-                } catch (err) {
-                    if (i === retries - 1) throw err;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                }
-            }
+            return await callGeminiGeneric(payload, retries, delay);
         }
 
         function selectTopic(topicName) {
@@ -756,9 +774,6 @@ CRITICAL RULES OF INTERACTION:
             chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
 
             try {
-                // Use stable authorized model gemini-2.5-flash-preview-09-2025
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
-                
                 const payload = {
                     contents: [
                         ...conversationHistory.map(msg => ({ role: msg.role, parts: msg.parts })),
@@ -776,14 +791,7 @@ CRITICAL RULES OF INTERACTION:
                     }
                 };
 
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error();
-                const data = await response.json();
+                const data = await callGeminiGeneric(payload);
                 const hint = data.candidates[0].content.parts[0].text;
 
                 const hintBlock = document.createElement('div');
@@ -1107,9 +1115,6 @@ CRITICAL RULES OF INTERACTION:
             container.classList.add('hidden');
 
             try {
-                // Use stable authorized model gemini-2.5-flash-preview-09-2025
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
-                
                 // Formulate conversation log extract
                 const textHistoryLog = conversationHistory
                     .slice(-6)
@@ -1150,15 +1155,7 @@ CRITICAL RULES OF INTERACTION:
                     }
                 };
 
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error("Quiz API generator call failed.");
-
-                const result = await response.json();
+                const result = await callGeminiGeneric(payload);
                 const jsonText = result.candidates[0].content.parts[0].text;
                 
                 quizQuestions = JSON.parse(jsonText);
